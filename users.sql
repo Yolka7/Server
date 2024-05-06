@@ -1,0 +1,58 @@
+CREATE TABLE IF NOT EXISTS `departments`(
+    `departmentId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `department` LINESTRING NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `requestText`(
+    `requestId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `id` BIGINT UNSIGNED NOT NULL,
+    `status` INT NOT NULL,
+    `description` LINESTRING NOT NULL,
+    `answerText` LINESTRING NOT NULL,
+    `file1` LINESTRING NOT NULL,
+    `file2` LINESTRING NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `loginInfo`(
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `mail` LINESTRING NOT NULL,
+    `password` LINESTRING NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `requests`(
+    `requestId` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `id` BIGINT UNSIGNED NOT NULL,
+    `reqName` LINESTRING NOT NULL,
+    `departmentId` BIGINT UNSIGNED NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `code`(
+    `code1` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS `users`(
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `departmentId` BIGINT UNSIGNED NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS `userInfo`(
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` LINESTRING NOT NULL,
+    `surname` LINESTRING NOT NULL,
+    `photo` BIGINT NULL
+);
+
+ALTER TABLE
+    `users` ADD CONSTRAINT `users_id_foreign` FOREIGN KEY(`id`) REFERENCES `loginInfo`(`id`);
+
+ALTER TABLE
+    `requestText` ADD CONSTRAINT `requesttext_requestid_foreign` FOREIGN KEY(`requestId`) REFERENCES `requests`(`requestId`);
+
+ALTER TABLE
+    `loginInfo` ADD CONSTRAINT `logininfo_id_foreign` FOREIGN KEY(`id`) REFERENCES `userInfo`(`id`);
+
+ALTER TABLE
+    `users` ADD CONSTRAINT `users_departmentid_foreign` FOREIGN KEY(`departmentId`) REFERENCES `departments`(`departmentId`);
+
+ALTER TABLE
+    `requests` ADD CONSTRAINT `requests_id_foreign` FOREIGN KEY(`id`) REFERENCES `users`(`id`);
