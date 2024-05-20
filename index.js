@@ -140,7 +140,7 @@ app.get('/protected', authenticateToken, (req, res) => {
 });
 
 app.get('/ticket/:id', authenticateToken, (req, res) => {
-    console.log("[INFO] /ticket/:id", req.params.id);
+    console.log("[INFO] GET /ticket/:id", req.params.id);
 
     res.json(applications[parseInt(req.params.id) - 1]);
 });
@@ -149,8 +149,8 @@ app.get('/ticket/:id', authenticateToken, (req, res) => {
 app.post('/ticket', authenticateToken, (req, res) => {
     const {theme, category, description} = req.body;
     const user = req.user
-    console.log(`[INFO] /ticket/submit-application with user ${user.username} `, req.body);
-    applications.push({username: user.username, role: user.role, department: user.department, theme, category, description, status: "В процессе", answer: ""});
+    console.log(`[INFO] POST /ticket with user ${user.username} `, req.body);
+    applications.push({id: applications.length + 1, username: user.username, role: user.role, department: user.department, theme, category, description, status: "В процессе", answer: ""});
     res.json({success: true});
 });
 
@@ -191,10 +191,14 @@ app.patch('/ticket/:id', authenticateToken, (req, res) => {
     const user = req.user;
     const updatedData = req.body;
 
+    console.log(`[INFO] PATCH /ticket/:id ${id} with user ${user.username} data ${JSON.stringify(updatedData)}`);
+
     // Проверяем, является ли текущий пользователь администратором или модератором
     if (user.role === roles.ADMIN || user.role === roles.MODERATOR) {
         // Если пользователь имеет права, ищем заявку для редактирования
         const ticket = applications.find(app => app.id === id);
+        console.log(applications)
+        console.log(`Find ticket: ${JSON.stringify(ticket)}`)
         if (ticket) {
             // Обновляем только переданные поля
             Object.keys(updatedData).forEach(key => {
