@@ -107,7 +107,8 @@ app.post('/user/register', [
             department,
         });
 
-        res.json({success: true});
+        const token = jwt.sign({username, role: newUser.role, department: newUser.department}, 'your-secret-key');
+        res.json(token);
     } catch (error) {
         console.error('Error creating user:', error);
         res.status(500).json({error: 'Internal Server Error'});
@@ -150,7 +151,7 @@ app.post('/ticket', authenticateToken, (req, res) => {
     const {theme, category, description} = req.body;
     const user = req.user
     console.log(`[INFO] POST /ticket with user ${user.username} `, req.body);
-    applications.push({id: applications.length + 1, username: user.username, role: user.role, department: user.department, theme, category, description, status: "В процессе", answer: ""});
+    applications.push({id: applications.length + 1, username: user.username, role: user.role, department: user.department, theme, category, description, status: "Принято", answer: ""});
     res.json({success: true});
 });
 
@@ -161,7 +162,8 @@ app.get('/tickets', authenticateToken, (req, res) => {
     if (user.role === roles.ADMIN || user.role === roles.MODERATOR) {
         res.json({length: applications.length, applications});
     } else {
-        res.status(403).json({error: 'Access denied'});
+        const userApplications = applications.filter(app => app.username === user.username);
+        res.json({ length: userApplications.length, applications: userApplications });
     }
 });
 
