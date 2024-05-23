@@ -151,18 +151,37 @@ app.post('/ticket', authenticateToken, (req, res) => {
     const {theme, category, description} = req.body;
     const user = req.user
     console.log(`[INFO] POST /ticket with user ${user.username} `, req.body);
-    applications.push({id: applications.length + 1, username: user.username, role: user.role, department: user.department, theme, category, description, status: "Принято", answer: ""});
+    applications.push({id: (applications.length + 1).toString(), username: user.username, role: user.role, department: user.department, theme, category, description, status: "Отправлено", answer: ""});
     res.json({success: true});
 });
 
 // Маршрут для просмотра и удаления заявок
 app.get('/tickets', authenticateToken, (req, res) => {
     const user = req.user
+    const { done } = req.query; // Получаем параметр done из запроса
+
     // Проверяем, является ли текущий пользователь администратором или модератором
     if (user.role === roles.ADMIN || user.role === roles.MODERATOR) {
-        res.json({length: applications.length, applications});
+        let filteredApplications = applications;
+
+        // Если параметр done равен true, фильтруем тикеты по статусу "Закрыто"
+        if (done === 'true') {
+            filteredApplications = filteredApplications.filter(app => app.status === 'Закрыто');
+        } else {
+            filteredApplications = filteredApplications.filter(app => app.status !== 'Закрыто');
+        }
+
+        res.json({ length: filteredApplications.length, applications: filteredApplications });
     } else {
-        const userApplications = applications.filter(app => app.username === user.username);
+        let userApplications = applications.filter(app => app.username === user.username);
+
+        // Если параметр done равен true, фильтруем тикеты по статусу "Закрыто"
+        if (done === 'true') {
+            userApplications = userApplications.filter(app => app.status === 'Закрыто');
+        } else {
+            userApplications = userApplications.filter(app => app.status !== 'Закрыто');
+        }
+
         res.json({ length: userApplications.length, applications: userApplications });
     }
 });
@@ -198,7 +217,7 @@ app.patch('/ticket/:id', authenticateToken, (req, res) => {
     // Проверяем, является ли текущий пользователь администратором или модератором
     if (user.role === roles.ADMIN || user.role === roles.MODERATOR) {
         // Если пользователь имеет права, ищем заявку для редактирования
-        const ticket = applications.find(app => app.id === id);
+        const ticket = applications.find(app => app.id === id.toString());
         console.log(applications)
         console.log(`Find ticket: ${JSON.stringify(ticket)}`)
         if (ticket) {
